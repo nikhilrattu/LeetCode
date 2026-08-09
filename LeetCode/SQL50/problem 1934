@@ -1,0 +1,14 @@
+-- Write your PostgreSQL query statement below
+  WITH stats AS (
+    SELECT user_id,
+    COUNT(action) AS total_requests,
+    SUM(CASE WHEN action='confirmed' THEN 1 ELSE 0 END) AS total_confirmed,
+    SUM(CASE WHEN action='timeout' THEN 1 ELSE 0 END) AS total_timeout
+    FROM Confirmations
+    GROUP BY user_id
+  )
+
+  SELECT si.user_id,ROUND(COALESCE(1.0*total_confirmed/total_requests,0),2) AS confirmation_rate
+  FROM Signups si
+  LEFT JOIN  stats s
+  ON si.user_id=s.user_id
